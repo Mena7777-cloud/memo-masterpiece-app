@@ -1,2 +1,6 @@
 streamlit
 sqlalchemy==1.4.46
+bcrypt
+streamlit-option-menu
+pandas
+openpyxl
