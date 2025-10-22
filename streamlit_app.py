@@ -89,18 +89,23 @@ with st.sidebar:
 
 if selected_tab == "📊 لوحة التحكم":
     st.header("📊 لوحة التحكم")
-    total_products = db.query(Product).count()
-    total_quantity = sum([p.quantity for p in db.query(Product).all()]) or 0
-    total_value = sum([p.price * p.quantity for p in db.query(Product).all()]) or 0
+    all_products = db.query(Product).all() # نحصل على المنتجات مرة واحدة
+    total_products = len(all_products)
+    total_quantity = sum([p.quantity for p in all_products]) or 0
+    total_value = sum([p.price * p.quantity for p in all_products]) or 0
+        
     col1, col2, col3 = st.columns(3)
     col1.metric("إجمالي أنواع المنتجات", f"{total_products} نوع")
     col2.metric("إجمالي عدد القطع", f"{total_quantity} قطعة")
     col3.metric("القيمة الإجمالية للتخزين", f"{total_value:,} جنيه")
 
-    # إضافة احترافية: تصدير البيانات لملف Excel
+    # إضافة احترافية: تصدير البيانات لملف Excel (بالطريقة المضمونة)
     st.markdown("---")
     st.subheader("📥 تصدير البيانات")
-    all_products_df = pd.read_sql(db.query(Product).statement, db.bind)
+        
+    # --- هنا تم إصلاح الخطأ ---
+    products_data = [(p.id, p.name, p.description, p.category, p.supplier, p.quantity, p.price, p.reorder_level, p.added_at) for p in all_products]
+    all_products_df = pd.DataFrame(products_data, columns=['ID', 'Name', 'Description', 'Category', 'Supplier', 'Quantity', 'Price', 'Reorder Level', 'Added At'])
         
     output = BytesIO()
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
@@ -164,7 +169,6 @@ elif selected_tab == "🗃️ إدارة التخزين":
                 c1, c2 = st.columns([1, 5])
                 with c1:
                     if st.button("🗑️ حذف", key=f"del_{p.id}"):
-                        # هنا يمكن إضافة رسالة تأكيد
                         db.delete(p)
                         db.commit()
                         st.rerun()
