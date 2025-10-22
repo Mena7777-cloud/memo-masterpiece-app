@@ -16,7 +16,6 @@
 
 import warnings
 
-from bson.code import Code
 from bson.codec_options import CodecOptions, DEFAULT_CODEC_OPTIONS
 from bson.dbref import DBRef
 from bson.objectid import ObjectId
